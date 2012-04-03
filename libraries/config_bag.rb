@@ -19,11 +19,12 @@ module ConfigBag
   def override_data_bag(name_override)
     @_data_bag_override = name_override
   end
-
+  
   # Returns the name of the data bag containing configuration entries
   def data_bag
     @_data_bag_override || node[node_key][:config_data_bag_override] || node_key
   end
+  
 
   # args:: attribute names
   # Returns hash of requested attributes
@@ -33,12 +34,14 @@ module ConfigBag
 
   # key:: attribute key
   # bag:: optional data bag
+  # attribute_path:: optionnal attribute path (one_node[:foo][:bar])
   # Returns value from data bag for provided key and falls back to 
   # node attributes if no value is found within data bag
-  def bag_or_node(key, bag=nil)
+  def bag_or_node(key, bag=nil, attribute_path=nil)
     bag ||= retrieve_data_bag
+    attribute ||= retrieve_attribute
     val = bag[key.to_s] if bag
-    val || node[node_key][key]
+    val || attribute[key]
   end
 
   # Returns configuration data bag
@@ -57,6 +60,11 @@ module ConfigBag
       end
     end
     @_cached_bag
+  end
+
+	#return the attribute
+  def retrieve_attribute
+    node[node_key][key]
   end
 
   # Returns data bag entry name based on node attributes or
