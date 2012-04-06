@@ -22,7 +22,7 @@ module ConfigBag
 
   # Returns the name of the data bag containing configuration entries
   def _data_bag
-    @_data_bag_override || node[node_key][:config_data_bag_override] || _node_key
+    @_data_bag_override || node[_node_key][:config_data_bag_override] || _node_key
   end
 
   # args:: attribute names
@@ -38,7 +38,7 @@ module ConfigBag
   def bag_or_node(key, bag=nil)
     bag ||= _retrieve_data_bag
     val = bag[key.to_s] if bag
-    val || node[node_key][key]
+    val || node[_node_key][key]
   end
 
   # Returns configuration data bag
@@ -49,7 +49,7 @@ module ConfigBag
           _data_bag, _data_bag_name, _data_bag_secret
         )
       else
-        @_cached_bag = search(_data_bag, "id:#{_data_bag_name}").first
+        @_cached_bag = Chef::DataBagItem.load(_data_bag, _data_bag_name)
       end
     end
     @_cached_bag
@@ -57,7 +57,7 @@ module ConfigBag
 
   # Returns data bag entry name based on node attributes or
   # defaults to using node name prefixed with 'config_'
-  def data_bag_name
+  def _data_bag_name
     if(node[_node_key][:config_bag])
       if(node[_node_key][:config_bag].respond_to?(:has_key?))
         name = node[_node_key][:config_bag][:name].to_s
